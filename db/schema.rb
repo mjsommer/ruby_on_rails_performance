@@ -10,8 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2026_09_22_212755) do
-
+ActiveRecord::Schema[7.0].define(version: 2026_09_22_224120) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -21,9 +20,9 @@ ActiveRecord::Schema.define(version: 2026_09_22_212755) do
     t.string "usage_type"
     t.string "color"
     t.integer "wheels", default: 2
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-    t.check_constraint "(usage_type)::text = ANY ((ARRAY['road'::character varying, 'off-road'::character varying])::text[])", name: "usage_type_check"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.check_constraint "usage_type::text = ANY (ARRAY['road'::character varying::text, 'off-road'::character varying::text])", name: "usage_type_check"
   end
 
 end
