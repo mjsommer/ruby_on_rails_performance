@@ -13,8 +13,8 @@ gem 'puma', '~> 6.0'
 gem 'sass-rails', '>= 6'
 # Use JS with ESM import maps. Read more: https://github.com/rails/importmap-rails
 gem 'importmap-rails'
-# Turbolinks makes navigating your web application faster. Read more: https://github.com/turbolinks/turbolinks
-gem 'turbolinks', '~> 5'
+# Hotwire's SPA-like page accelerator. Read more: https://turbo.hotwired.dev
+gem 'turbo-rails'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem 'jbuilder', '~> 2.7'
 # Use Redis adapter to run Action Cable in production
