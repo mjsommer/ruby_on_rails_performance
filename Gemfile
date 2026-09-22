@@ -33,6 +33,8 @@ group :development, :test do
   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
   # RSpec for unit/request/system specs
   gem 'rspec-rails', '~> 6.1'
+  # Test data factories
+  gem 'factory_bot_rails', '~> 6.4'
 end
 
 group :development do
