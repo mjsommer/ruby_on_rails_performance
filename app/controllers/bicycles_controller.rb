@@ -18,7 +18,7 @@ class BicyclesController < ApplicationController
     if @bicycle.save
       redirect_to @bicycle, notice: "Bicycle was successfully created."
     else
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
   end
 
@@ -29,7 +29,7 @@ class BicyclesController < ApplicationController
     if @bicycle.update(bicycle_params)
       redirect_to @bicycle, notice: "Bicycle was successfully updated."
     else
-      render :edit, status: :unprocessable_entity
+      render :edit, status: :unprocessable_content
     end
   end
 

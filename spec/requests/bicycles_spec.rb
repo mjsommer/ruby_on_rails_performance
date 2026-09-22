@@ -56,7 +56,7 @@ RSpec.describe "Bicycles", type: :request do
           post bicycles_path, params: { bicycle: invalid_attributes }
         }.not_to change(Bicycle, :count)
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
       end
     end
   end
@@ -92,7 +92,7 @@ RSpec.describe "Bicycles", type: :request do
 
         patch bicycle_path(bicycle), params: { bicycle: invalid_attributes }
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(bicycle.reload.brand).not_to eq("")
       end
     end
