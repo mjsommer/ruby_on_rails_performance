@@ -4,30 +4,30 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project state
 
-This is a Rails application (`rails new`) with Webpacker for JavaScript bundling. The only domain feature so far is a `Bicycle` CRUD resource (brand, model, usage_type, color, wheels) — see Architecture notes below. There is no README content beyond the default template.
+This is a Rails application (`rails new`) using import maps (`importmap-rails`) for JavaScript — no Node/Yarn/build step. The only domain feature so far is a `Bicycle` CRUD resource (brand, model, usage_type, color, wheels) — see Architecture notes below. There is no README content beyond the default template.
 
 ## Stack
 
-- Ruby 3.3.12, Rails 6.1.7.10
+- Ruby 3.3.12, Rails 7.1.6
 - PostgreSQL (`pg` gem) — databases are named `test_app_v6_{development,test,production}` in `config/database.yml`
-- Puma as the app server
-- Webpacker 5 for JS bundling, with Babel (see `babel.config.js`) and PostCSS (`postcss.config.js`)
-- Turbolinks + `@rails/ujs` for the JS/HTML integration layer
-- RSpec (`rspec-rails`) for unit/request specs, with Capybara + Selenium/`webdrivers` for system specs, and `factory_bot_rails` for test data (factories in `spec/factories/`)
+- Puma 6 as the app server (Rails 7.1 pulls in Rack 3, which requires Puma >= 6)
+- `importmap-rails` for JS — no bundler, no Node/Yarn. Entry point is `app/javascript/application.js`; pins live in `config/importmap.rb`; CDN-vendored packages sit in `vendor/javascript/`
+- Turbo (`turbo-rails`) + `@rails/ujs` for the JS/HTML integration layer (Turbo Drive handles navigation/forms; UJS handles `data-method`/`data-confirm` links like the Delete button)
+- CSS goes through Sprockets/`sass-rails` (`app/assets/stylesheets/`) — this was never routed through the JS bundler, before or after the import-map migration
+- RSpec (`rspec-rails`) for unit/request specs, with Capybara + `selenium-webdriver` for system specs, and `factory_bot_rails` for test data (factories in `spec/factories/`). No `webdrivers` gem — `selenium-webdriver` >= 4.11 ships Selenium Manager, which auto-provisions the matching browser driver
+- The existing system spec (`spec/system/bicycles_spec.rb`) explicitly uses `driven_by(:rack_test)`, so it doesn't execute JS or exercise Selenium. A real Selenium/Chrome system spec has never been added to the suite — only ad hoc manual verification during the Rails 7.1 upgrade confirmed Selenium Manager + headless Chrome actually work end to end against this app
 
 ## Commands
 
 Setup:
 ```
-bin/setup          # installs gems, prepares the db, etc.
+bin/setup          # installs gems, prepares the db, etc. (no yarn install needed)
 bundle install
-yarn install
 ```
 
-Run the app (needs both the Rails server and Webpacker dev server in development):
+Run the app:
 ```
-bin/rails server
-bin/webpack-dev-server
+bin/rails server    # import maps have no separate dev server/build step
 ```
 
 Database:
@@ -54,8 +54,8 @@ bin/rails console
 ## Architecture notes
 
 - Standard Rails app layout (`app/models`, `app/controllers`, `app/views`, `app/jobs`, `app/mailers`, `app/channels`, `app/helpers`) — no non-standard directories or service-object conventions have been established.
-- JavaScript lives in `app/javascript` and is compiled by Webpacker; entry packs are in `app/javascript/packs`, with Action Cable channel setup under `app/javascript/channels`.
-- `config/webpacker.yml` and `config/webpack/` control the Webpacker build; `babel.config.js` and `postcss.config.js` sit at the repo root because Webpacker expects them there.
-- `Bicycle` (`app/models/bicycle.rb`) is the only domain model: `usage_type` is restricted to `road`/`off-road` at both the model (`Bicycle::USAGE_TYPES`, inclusion validation) and DB level (Postgres check constraint `usage_type_check`), `wheels` defaults to 2 in the schema. Scopes `Bicycle.road` / `Bicycle.off_road` filter by usage type. `BicyclesController` is a plain RESTful resource; `root` routes to `bicycles#index`.
-- **Webpacker/Babel gotcha**: `bin/webpack` and `bin/webpack-dev-server` require `"logger"` at the top before `bundler/setup` — without it they crash under Ruby 3.3.5+ (stdlib no longer auto-loads `logger` before Bundler boots, which older Rails/Webpacker assume). `babel.config.js` also references `@babel/plugin-proposal-private-methods` and `@babel/plugin-proposal-private-property-in-object`, which ship in `node_modules` only as non-functional placeholder packages unless explicitly added to `package.json` (already done) — if JS asset compilation ever throws `PLACEHOLDER PACKAGE` or `Cannot find package '@babel/plugin-proposal-...'`, this is why.
+- JavaScript lives in `app/javascript`; `application.js` is the sole entry point (imports `@rails/ujs` and `@hotwired/turbo-rails`). `app/javascript/channels/consumer.js` is dormant Action Cable scaffolding — no channels are actually defined, and nothing imports it yet.
+- `config/importmap.rb` pins JS packages; run `bin/importmap pin <package>` to add one. Pins resolve either to a CDN-vendored file under `vendor/javascript/` (e.g. `@rails/ujs`, `@rails/actioncable`) or, for `@hotwired/turbo-rails`, to the gem's own bundled asset.
+- `Bicycle` (`app/models/bicycle.rb`) is the only domain model: `usage_type` is restricted to `road`/`off-road` at both the model (`Bicycle::USAGE_TYPES`, inclusion validation) and DB level (Postgres check constraint `usage_type_check`), `wheels` defaults to 2 in the schema. Scopes `Bicycle.road` / `Bicycle.off_road` filter by usage type (covered by model specs; no UI currently exposes this filtering). `BicyclesController` is a plain RESTful resource; `root` routes to `bicycles#index`. Failed create/update render with `status: :unprocessable_content` (Rack 3 renamed the old `:unprocessable_entity` symbol) — Turbo Drive relies on that 422 status to redisplay the form in place.
+- **Spring gotcha**: Spring's preloader has repeatedly hung (not just slowed down — genuinely stuck) after Gemfile/config changes during the Rails 6.1→7.1 upgrade. If a `bin/rails` command seems to hang, run `bin/spring stop` (or prefix the command with `DISABLE_SPRING=1`) rather than waiting it out.
 - Prefer extending this structure (new models under `app/models`, routes in `config/routes.rb`) rather than introducing new architectural patterns without discussion.
