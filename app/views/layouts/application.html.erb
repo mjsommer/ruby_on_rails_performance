@@ -11,6 +11,15 @@
   </head>
 
   <body>
+    <nav>
+      <%= link_to "Bicycle Shop", root_path %>
+      <%= link_to "Bicycles", bicycles_path %>
+    </nav>
+
+    <% flash.each do |type, message| %>
+      <div class="flash <%= type %>"><%= message %></div>
+    <% end %>
+
     <%= yield %>
   </body>
 </html>
