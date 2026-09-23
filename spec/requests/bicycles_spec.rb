@@ -30,6 +30,16 @@ RSpec.describe "Bicycles", type: :request do
       expect(response.body).to include(bicycle.model)
     end
 
+    it "shows the bicycle's usage type, color, and wheel count" do
+      bicycle = create(:bicycle, usage_type: "off-road", color: "Neon Green", wheels: 3)
+
+      get bicycle_path(bicycle)
+
+      expect(response.body).to include("off-road")
+      expect(response.body).to include("Neon Green")
+      expect(response.body).to include("3")
+    end
+
     it "returns 404 when the bicycle does not exist" do
       get bicycle_path(id: -1)
 
@@ -80,6 +90,17 @@ RSpec.describe "Bicycles", type: :request do
       get edit_bicycle_path(bicycle)
 
       expect(response).to have_http_status(:ok)
+    end
+
+    it "pre-fills the form with the bicycle's current values" do
+      bicycle = create(:bicycle, brand: "Cannondale", model: "Synapse", color: "Neon Green", wheels: 3)
+
+      get edit_bicycle_path(bicycle)
+
+      expect(response.body).to include("Cannondale")
+      expect(response.body).to include("Synapse")
+      expect(response.body).to include("Neon Green")
+      expect(response.body).to include(%(value="3"))
     end
 
     it "returns 404 when the bicycle does not exist" do
