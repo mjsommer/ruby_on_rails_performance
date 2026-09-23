@@ -5,6 +5,10 @@ ruby '3.3.12'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails', branch: 'main'
 gem 'rails', '~> 8.1.3'
+# Pin below json 3.0, which changed JSON.parse's second argument to
+# keyword-only and breaks ActiveSupport::JSON.decode's positional call
+# (activesupport declares no upper bound on json itself).
+gem 'json', '~> 2.21'
 # Use postgresql as the database for Active Record
 gem 'pg', '~> 1.1'
 # Use Puma as the app server
