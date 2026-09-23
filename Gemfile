@@ -41,6 +41,8 @@ group :development, :test do
   gem 'rspec-rails', '~> 8.0'
   # Test data factories
   gem 'factory_bot_rails', '~> 6.4'
+  # Code coverage reporting for the RSpec suite
+  gem 'simplecov', require: false
 end
 
 group :development do

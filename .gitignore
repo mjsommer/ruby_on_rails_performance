@@ -37,3 +37,6 @@ yarn-debug.log*
 
 #IDE files
 .idea/
+
+# Ignore SimpleCov coverage reports.
+/coverage/
