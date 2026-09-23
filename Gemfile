@@ -13,8 +13,10 @@ gem 'json', '~> 2.21'
 gem 'pg', '~> 1.1'
 # Use Puma as the app server
 gem 'puma', '~> 8.0'
-# Use SCSS for stylesheets
-gem 'sass-rails', '>= 6'
+# Use the Sprockets asset pipeline (app/assets/stylesheets is plain CSS -- no
+# Sass anywhere in the app, so sass-rails/sassc-rails/sassc are dropped; only
+# sprockets-rails is actually needed to serve it)
+gem 'sprockets-rails'
 # Use JS with ESM import maps. Read more: https://github.com/rails/importmap-rails
 gem 'importmap-rails'
 # Hotwire's SPA-like page accelerator. Read more: https://turbo.hotwired.dev
