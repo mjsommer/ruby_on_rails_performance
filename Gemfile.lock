@@ -287,7 +287,6 @@ GEM
       rexml (~> 3.2, >= 3.2.5)
       rubyzip (>= 1.2.2, < 4.0)
       websocket (~> 1.0)
-    spring (4.7.0)
     sprockets (4.4.1)
       concurrent-ruby (~> 1.1)
       logger
@@ -348,7 +347,6 @@ DEPENDENCIES
   rspec-rails (~> 8.0)
   sass-rails (>= 6)
   selenium-webdriver (>= 4.11)
-  spring
   turbo-rails
   tzinfo-data
   web-console (>= 4.1.0)
