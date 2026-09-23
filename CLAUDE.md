@@ -8,13 +8,13 @@ This is a Rails application (`rails new`) using import maps (`importmap-rails`) 
 
 ## Stack
 
-- Ruby 3.3.12, Rails 7.1.6
+- Ruby 3.3.12, Rails 8.1.3.1 (`config.load_defaults 8.1`, fully adopted — no lingering `new_framework_defaults_*.rb` initializers)
 - PostgreSQL (`pg` gem) — databases are named `test_app_v6_{development,test,production}` in `config/database.yml`
-- Puma 6 as the app server (Rails 7.1 pulls in Rack 3, which requires Puma >= 6)
+- Puma 8 as the app server (bumped straight from 6 during the Rails 8.1 upgrade; Rack 3 requires Puma >= 6). This app doesn't use Puma lifecycle hooks or cluster/`workers` mode, so none of Puma 7/8's breaking changes (hook renames, `preload_app!` cluster default) apply here
 - `importmap-rails` for JS — no bundler, no Node/Yarn. Entry point is `app/javascript/application.js`; pins live in `config/importmap.rb`; CDN-vendored packages sit in `vendor/javascript/`
 - Turbo (`turbo-rails`) + `@rails/ujs` for the JS/HTML integration layer (Turbo Drive handles navigation/forms; UJS handles `data-method`/`data-confirm` links like the Delete button)
-- CSS goes through Sprockets/`sass-rails` (`app/assets/stylesheets/`) — this was never routed through the JS bundler, before or after the import-map migration
-- RSpec (`rspec-rails`) for unit/request specs, with Capybara + `selenium-webdriver` for system specs, and `factory_bot_rails` for test data (factories in `spec/factories/`). No `webdrivers` gem — `selenium-webdriver` >= 4.11 ships Selenium Manager, which auto-provisions the matching browser driver
+- CSS goes through plain Sprockets (`sprockets-rails`) — `app/assets/stylesheets/application.css` is plain CSS, no Sass anywhere in the app. `sass-rails`/`sassc-rails`/`sassc` were dropped during the Rails 8.1 upgrade (unused, and `sassc-rails`'s repo was archived in October 2025); `sprockets-rails` is now a direct Gemfile dependency instead of a transitive one. This was never routed through the JS bundler, before or after the import-map migration
+- RSpec (`rspec-rails`, `~> 8.0` as of the Rails 8.1 upgrade) for unit/request specs, with Capybara + `selenium-webdriver` for system specs, and `factory_bot_rails` for test data (factories in `spec/factories/`). No `webdrivers` gem — `selenium-webdriver` >= 4.11 ships Selenium Manager, which auto-provisions the matching browser driver
 - The existing system spec (`spec/system/bicycles_spec.rb`) explicitly uses `driven_by(:rack_test)`, so it doesn't execute JS or exercise Selenium. A real Selenium/Chrome system spec has never been added to the suite — only ad hoc manual verification during the Rails 7.1 upgrade confirmed Selenium Manager + headless Chrome actually work end to end against this app
 
 ## Commands
@@ -51,11 +51,19 @@ Console:
 bin/rails console
 ```
 
+CI (setup + importmap vulnerability audit + RSpec, all in one):
+```
+bin/ci
+```
+
 ## Architecture notes
 
 - Standard Rails app layout (`app/models`, `app/controllers`, `app/views`, `app/jobs`, `app/mailers`, `app/channels`, `app/helpers`) — no non-standard directories or service-object conventions have been established.
 - JavaScript lives in `app/javascript`; `application.js` is the sole entry point (imports `@rails/ujs` and `@hotwired/turbo-rails`). `app/javascript/channels/consumer.js` is dormant Action Cable scaffolding — no channels are actually defined, and nothing imports it yet.
 - `config/importmap.rb` pins JS packages; run `bin/importmap pin <package>` to add one. Pins resolve either to a CDN-vendored file under `vendor/javascript/` (e.g. `@rails/ujs`, `@rails/actioncable`) or, for `@hotwired/turbo-rails`, to the gem's own bundled asset.
 - `Bicycle` (`app/models/bicycle.rb`) is the only domain model: `usage_type` is restricted to `road`/`off-road` at both the model (`Bicycle::USAGE_TYPES`, inclusion validation) and DB level (Postgres check constraint `usage_type_check`), `wheels` defaults to 2 in the schema. Scopes `Bicycle.road` / `Bicycle.off_road` filter by usage type (covered by model specs; no UI currently exposes this filtering). `BicyclesController` is a plain RESTful resource; `root` routes to `bicycles#index`. Failed create/update render with `status: :unprocessable_content` (Rack 3 renamed the old `:unprocessable_entity` symbol) — Turbo Drive relies on that 422 status to redisplay the form in place.
-- **Spring gotcha**: Spring's preloader has repeatedly hung (not just slowed down — genuinely stuck) after Gemfile/config changes during the Rails 6.1→7.1 upgrade. If a `bin/rails` command seems to hang, run `bin/spring stop` (or prefix the command with `DISABLE_SPRING=1`) rather than waiting it out.
+- **Spring was removed during the Rails 8.1 upgrade** (it's no longer in the Gemfile, and `bin/spring`/`config/spring.rb` are gone). This was a deliberate choice, not an oversight: Rails 8's own `bin/rails`/`bin/rake` templates dropped Spring's binstub wiring by default, the gem itself was tested and does still work against Rails 8.1, but this app's plain boot time without it is ~0.35s (bootsnap + Zeitwerk) — negligible savings for the hang risk. (Historical note: Spring's preloader had repeatedly hung — not just slowed down, genuinely stuck — after Gemfile/config changes during the Rails 6.1→7.1 upgrade.) Don't re-add Spring without a concrete reason; it isn't wired into any binstub.
+- **`json` gem gotcha**: pinned to `~> 2.21` (below 3.0) in the Gemfile. `json` 3.0 made `JSON.parse`'s second argument keyword-only, which breaks `ActiveSupport::JSON.decode`'s positional `::JSON.parse(json, options)` call under Rails 8.1.3.1 — activesupport declares no upper bound on `json`, so an unconstrained `bundle update` will happily resolve to 3.0 and silently break session/flash cookie decryption on every request. Don't remove this pin without confirming activesupport's `JSON.decode` has been fixed to call `JSON.parse` with keywords.
+- Rails 8.1's built-in CI runner (`bin/ci` / `config/ci.rb`) runs `bin/setup --skip-server`, `bin/importmap audit`, then tests. The generated template's default test step (`bin/rails test`, i.e. Minitest) was rewritten to `bundle exec rspec` since this app only has RSpec (`spec/`, no `test/` dir) — that step already covers system specs, so there's no separate `test:system` step. The template's default "Tests: Seeds" step (`db:seed:replant` against `RAILS_ENV=test`) was dropped entirely: `db/seeds.rb` commits real rows outside RSpec's transactional rollback, which permanently pollutes the test database for every `bundle exec rspec` run afterward (discovered the hard way — it broke the `Bicycle.road`/`.off_road` scope specs after one `bin/ci` run). If the test DB ever ends up in that state, `bin/rails db:test:prepare` restores it.
+- Solid Queue, Solid Cache, Solid Cable, Kamal 2, Thruster, and the `bin/rails generate authentication` scaffold were all evaluated during the Rails 8.1 upgrade and deliberately **not** adopted: this app has no background jobs, no cache pressure, no Action Cable channels in use, no chosen deployment target, and no auth requirement. Don't propose adopting any of these reflexively — each is a separate decision to make if/when the app actually grows a matching need.
 - Prefer extending this structure (new models under `app/models`, routes in `config/routes.rb`) rather than introducing new architectural patterns without discussion.
