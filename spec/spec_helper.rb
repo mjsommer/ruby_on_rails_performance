@@ -3,7 +3,8 @@ SimpleCov.start 'rails' do
   # Dead Rails scaffolding, never loaded: no jobs, mailers, or Action Cable
   # channels are actually used in this app (see CLAUDE.md). Tracking them
   # only added noise to the coverage report, not a real gap.
-  skip 'app/channels/application_cable/'
+  skip 'app/channels/application_cable/channel.rb'
+  skip 'app/channels/application_cable/connection.rb'
   skip 'app/jobs/application_job.rb'
   skip 'app/mailers/application_mailer.rb'
 end
