@@ -54,6 +54,18 @@ RSpec.describe Bicycle, type: :model do
       expect(bicycle).not_to be_valid
       expect(bicycle.errors[:wheels]).to include("must be an integer")
     end
+
+    it "defaults wheels to 2" do
+      expect(Bicycle.new.wheels).to eq(2)
+    end
+  end
+
+  describe "database constraints" do
+    it "rejects an invalid usage_type at the database level, bypassing model validations" do
+      bicycle = create(:bicycle)
+      expect { bicycle.update_column(:usage_type, "mountain") }
+        .to raise_error(ActiveRecord::StatementInvalid, /usage_type_check/)
+    end
   end
 
   describe "scopes" do
