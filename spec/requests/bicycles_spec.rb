@@ -29,6 +29,12 @@ RSpec.describe "Bicycles", type: :request do
       expect(response).to have_http_status(:ok)
       expect(response.body).to include(bicycle.model)
     end
+
+    it "returns 404 when the bicycle does not exist" do
+      get bicycle_path(id: -1)
+
+      expect(response).to have_http_status(:not_found)
+    end
   end
 
   describe "GET /bicycles/new" do
@@ -58,6 +64,12 @@ RSpec.describe "Bicycles", type: :request do
 
         expect(response).to have_http_status(:unprocessable_content)
       end
+
+      it "redisplays the form with validation errors" do
+        post bicycles_path, params: { bicycle: invalid_attributes }
+
+        expect(response.body).to include("can&#39;t be blank")
+      end
     end
   end
 
@@ -68,6 +80,12 @@ RSpec.describe "Bicycles", type: :request do
       get edit_bicycle_path(bicycle)
 
       expect(response).to have_http_status(:ok)
+    end
+
+    it "returns 404 when the bicycle does not exist" do
+      get edit_bicycle_path(id: -1)
+
+      expect(response).to have_http_status(:not_found)
     end
   end
 
@@ -95,6 +113,20 @@ RSpec.describe "Bicycles", type: :request do
         expect(response).to have_http_status(:unprocessable_content)
         expect(bicycle.reload.brand).not_to eq("")
       end
+
+      it "redisplays the form with validation errors" do
+        bicycle = create(:bicycle)
+
+        patch bicycle_path(bicycle), params: { bicycle: invalid_attributes }
+
+        expect(response.body).to include("can&#39;t be blank")
+      end
+    end
+
+    it "returns 404 when the bicycle does not exist" do
+      patch bicycle_path(id: -1), params: { bicycle: valid_attributes }
+
+      expect(response).to have_http_status(:not_found)
     end
   end
 
@@ -107,6 +139,12 @@ RSpec.describe "Bicycles", type: :request do
       }.to change(Bicycle, :count).by(-1)
 
       expect(response).to redirect_to(bicycles_path)
+    end
+
+    it "returns 404 when the bicycle does not exist" do
+      delete bicycle_path(id: -1)
+
+      expect(response).to have_http_status(:not_found)
     end
   end
 end
