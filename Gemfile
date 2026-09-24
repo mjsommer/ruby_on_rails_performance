@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
-ruby '3.3.12'
+ruby '4.0.7'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails', branch: 'main'
 gem 'rails', '~> 6.1.7.10'
@@ -27,6 +27,14 @@ gem 'jbuilder', '~> 2.7'
 
 # Reduces boot times through caching; required in config/boot.rb
 gem 'bootsnap', '>= 1.4.4', require: false
+
+# activesupport 6.1.7.10 requires these at boot but doesn't declare them as
+# dependencies; both were removed from Ruby's default gems by 4.0 (bigdecimal:
+# hard LoadError; mutex_m: warning under 3.3.12, presumably the same fate as
+# bigdecimal on a future Ruby). Required for Rails 6.1 to boot under Ruby 4.0.7.
+gem 'bigdecimal'
+gem 'mutex_m'
+gem 'benchmark'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console

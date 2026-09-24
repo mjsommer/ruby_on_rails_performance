@@ -8,7 +8,14 @@ This is a Rails application (`rails new`) with Webpacker for JavaScript bundling
 
 ## Stack
 
-- Ruby 3.3.12, Rails 6.1.7.10
+- Ruby 4.0.7, Rails 6.1.7.10 — this directory is a copy of `test_app_v6` (Ruby 3.3.12) ported to
+  Ruby 4.0.7 for an A/B performance comparison; see `../rails_perf_comparison_same_ruby_v3312_w_rails_v6_vs_v8`.
+  Its own databases (`test_app_v6_r4_*`) are separate from `test_app_v6`'s.
+  **Ruby 4.0.7 port gotchas**: activesupport 6.1.7.10 `require`s `bigdecimal` and `mutex_m` at
+  boot without declaring them as dependencies (Ruby 3.4 warning, hard `LoadError` on 4.0.7);
+  `sass-rails`/`sassc-rails` likewise `require "benchmark"` (removed as a default gem in Ruby
+  4.0.0). All three are added directly to the Gemfile here. Don't remove them without confirming
+  Rails 6.1.7.10 no longer needs them undeclared.
 - PostgreSQL (`pg` gem) — databases are named `test_app_v6_{development,test,production}` in `config/database.yml`
 - Puma as the app server
 - Webpacker 5 for JS bundling, with Babel (see `babel.config.js`) and PostCSS (`postcss.config.js`)
