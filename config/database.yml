@@ -23,7 +23,7 @@ default: &default
 
 development:
   <<: *default
-  database: test_app_v6_development
+  database: test_app_v7_to_v8_org_v6_r3_development
 
   # The specified database role being used to connect to postgres.
   # To create additional roles in postgres see `$ createuser --help`.
@@ -57,7 +57,7 @@ development:
 # Do not set this db to the same as development or production.
 test:
   <<: *default
-  database: test_app_v6_test
+  database: test_app_v7_to_v8_org_v6_r3_test
 
 # As with config/credentials.yml, you never want to store sensitive information,
 # like your database password, in your source code. If your source code is
@@ -81,6 +81,6 @@ test:
 #
 production:
   <<: *default
-  database: test_app_v6_production
-  username: test_app_v6
-  password: <%= ENV['TEST_APP_V6_DATABASE_PASSWORD'] %>
+  database: test_app_v7_to_v8_org_v6_r3_production
+  username: test_app_v7_to_v8_org_v6_r3
+  password: <%= ENV['TEST_APP_V7_TO_V8_ORG_V6_R3_DATABASE_PASSWORD'] %>
