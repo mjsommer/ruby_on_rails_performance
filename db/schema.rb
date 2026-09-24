@@ -10,19 +10,18 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2026_09_22_224120) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_22_224120) do
   # These are extensions that must be enabled in order to support this database
-  enable_extension "plpgsql"
+  enable_extension "pg_catalog.plpgsql"
 
   create_table "bicycles", force: :cascade do |t|
     t.string "brand"
-    t.string "model"
-    t.string "usage_type"
     t.string "color"
-    t.integer "wheels", default: 2
     t.datetime "created_at", null: false
+    t.string "model"
     t.datetime "updated_at", null: false
+    t.string "usage_type"
+    t.integer "wheels", default: 2
     t.check_constraint "usage_type::text = ANY (ARRAY['road'::character varying::text, 'off-road'::character varying::text])", name: "usage_type_check"
   end
-
 end
