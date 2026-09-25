@@ -1,0 +1,17 @@
+Outline individual Cluade promts to build a Rails app to run a bicycle shop, including: Brand, Model, usage type (road, off-raod), color, and number of wheels. Divide the steps into: 1) database, 2) model/controller code, 3) views, and 4) units tests. Do not, generate the code.
+
+Outline individual claude promps to update this application to Rails 8.1.3.1. Do not run the code.
+
+
+Outline indiviual claude prompts, to update application to use Ruby 4.0.7.
+
+Outline indiviual claude prompts, to update application to use Ruby 3.3.12.
+
+Outline indiviual claude prompts, to measure application test coverage.
+
+Outline indiviual claude prompts, to remove SimpleCov coverage testing for unused application_cable, application_job, and application_mailer.
+
+Outline indiviual claude prompts, to compare performance of the same Rails code, running with two differnt Ruby vesrions: a) Rails app runing at test_app_v7_to_v8_org_v6_r3, using Ruby 3.3.12, and b) Rails app runing at test_app_v7_to_v8_org_v6_r4, using Ruby 4.0.7.
+
+Outline indiviual claude prompts, to compare performance of the same functional Rails application, using the same Ruby version 3.3.12, but with: a) Rails 6.1.7.10 running in test_app_v6, and b) Rails 8.1.3.1 running in test_app_v7_to_v8_org_v6_r3.
+
