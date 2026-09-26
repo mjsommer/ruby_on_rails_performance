@@ -1,0 +1,39 @@
+{
+  "app_dir": "/Users/sommer/Projects/test_app_v7_to_v8_org_v6_r3",
+  "ruby_version": "3.3.12",
+  "rails_version": "8.1.3.1",
+  "asset_pipeline": "importmap+sprockets",
+  "js_layer": "turbo+ujs",
+  "timestamp": "2026-09-24T21:17:00Z",
+  "os": "macOS 26.7 (Darwin 25.6.0, arm64)",
+  "boot_time_seconds": {
+    "samples": [0.53, 0.50, 0.51, 0.50, 0.51],
+    "mean": 0.51
+  },
+  "boot_rss_mb": {
+    "samples": [102.0, 101.656, 101.5, 102.609, 101.594],
+    "mean": 101.872
+  },
+  "test_suite": {
+    "duration_seconds": [0.31289, 0.29859, 0.31372],
+    "examples": 34,
+    "failures": 0
+  },
+  "http": {
+    "index": {"req_per_sec": 1072.22, "mean_latency_ms": 9.326, "p95_ms": 12, "p99_ms": 16},
+    "show":  {"req_per_sec": 1404.69, "mean_latency_ms": 7.119, "p95_ms": 8, "p99_ms": 11}
+  },
+  "puma_rss_after_load_mb": 118.203,
+  "microbench_ips": {
+    "ar_validation": 60310.3571,
+    "json_roundtrip": 1460920.379646,
+    "array_sort": 1032.652471
+  },
+  "notes": [
+    "HTTP load test: ab -n 500 -c 10 against /bicycles and /bicycles/1, RAILS_ENV=production with precompiled assets (import maps + Sprockets CSS), DATABASE_URL override pointing at a local dedicated test_app_v7_to_v8_org_v6_r3_production database (its own database.yml production role/password were never provisioned locally). 0 failed requests on both endpoints. Run on port 3100, sequentially after v6 (v6's server was already stopped) -- not concurrently, unlike the earlier Ruby v3/v4 comparison, so no shared-CPU confound between the two runs.",
+    "boot_time_seconds/boot_rss_mb measured via `/usr/bin/time -l bin/rails runner \"exit\"` in RAILS_ENV=production, 5 samples.",
+    "test_suite duration is bundle exec rspec's own reported 'Finished in' wall time (test env, not production), 3 samples; includes SimpleCov instrumentation overhead (this app has SimpleCov configured, test_app_v6 does not) -- a real methodology difference between the two apps' suites, not just a Rails-version effect.",
+    "microbench_ips computed with the identical scripts used for v6 (iterations / Benchmark.realtime for fixed iteration counts): ar_validation 50k Bicycle#valid? calls under RAILS_ENV=production via bin/rails runner; json_roundtrip 500k JSON.generate+JSON.parse roundtrips of a representative Bicycle-shaped hash; array_sort 1k iterations of building+sorting a fresh 10k-element random Integer array -- plain `ruby`, Ruby 3.3.12. json_roundtrip and array_sort don't touch Rails/AR at all, so they're expected to land within noise of v6's numbers (and did: 1,460,920 vs 1,456,511 ips and 1,032.7 vs 1,031.6 ips) -- a useful sanity check that the harness itself isn't introducing a bias.",
+    "puma_rss_after_load_mb is RSS (ps aux, RSS column) of the single Puma worker process immediately after both ab runs completed."
+  ]
+}
