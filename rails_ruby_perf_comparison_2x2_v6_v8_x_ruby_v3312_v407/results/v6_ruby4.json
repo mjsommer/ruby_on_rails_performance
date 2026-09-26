@@ -1,0 +1,41 @@
+{
+  "app_dir": "/Users/sommer/Projects/test_app_v6_r4",
+  "ruby_version": "4.0.7",
+  "rails_version": "6.1.7.10",
+  "asset_pipeline": "webpacker",
+  "js_layer": "turbolinks+ujs",
+  "timestamp": "2026-09-24T21:33:00Z",
+  "os": "macOS 26.7 (Darwin 25.6.0, arm64)",
+  "boot_time_seconds": {
+    "samples": [0.41, 0.38, 0.38, 0.38, 0.39],
+    "mean": 0.388
+  },
+  "boot_rss_mb": {
+    "samples": [99.469, 99.391, 97.343, 99.547, 97.359],
+    "mean": 98.622
+  },
+  "test_suite": {
+    "duration_seconds": [0.0886, 0.10039, 0.09214],
+    "examples": 21,
+    "failures": 0
+  },
+  "http": {
+    "index": {"req_per_sec": 986.66, "mean_latency_ms": 10.135, "p95_ms": 20, "p99_ms": 34},
+    "show":  {"req_per_sec": 1504.72, "mean_latency_ms": 6.646, "p95_ms": 8, "p99_ms": 11}
+  },
+  "puma_rss_after_load_mb": 117.922,
+  "microbench_ips": {
+    "ar_validation": 56920.379771,
+    "json_roundtrip": 1667756.2677,
+    "array_sort": 1033.885601
+  },
+  "notes": [
+    "This app (test_app_v6_r4) is a copy of test_app_v6 ported to Ruby 4.0.7 specifically for this comparison -- it did not previously exist. Required real Gemfile fixes to boot at all: activesupport 6.1.7.10 requires bigdecimal and mutex_m at boot without declaring them as dependencies (hard LoadError on Ruby 4.0.7, not just a warning as under 3.3.12); sass-rails/sassc-rails likewise require 'benchmark', removed as a default gem in Ruby 4.0.0. All three added directly to the Gemfile. No other compatibility issues surfaced -- bundle install, db:migrate, the full RSpec suite (21 examples), and a from-scratch production assets:precompile (Webpacker, with the same NODE_OPTIONS=--openssl-legacy-provider workaround as test_app_v6) all succeeded cleanly once those three gems were added.",
+    "Spring works normally under Ruby 4.0.7 once boot succeeds, but all measurements below use DISABLE_SPRING=1 (boot_time_seconds, test_suite) or RAILS_ENV=production (http, puma_rss, ar_validation microbench -- Spring never preloads a production-mode app on this system, confirmed during test_app_v6's own benchmark) to avoid any Spring-warm-process confound, matching test_app_v6's methodology exactly.",
+    "HTTP load test: ab -n 500 -c 10 against /bicycles and /bicycles/1, RAILS_ENV=production with precompiled assets, DATABASE_URL override pointing at a local dedicated test_app_v6_r4_production database (own Postgres role/password in database.yml never provisioned locally, same pattern as test_app_v6 and test_app_v7_to_v8_org_v6_r3). 0 failed requests on both endpoints. Own isolated Postgres databases (test_app_v6_r4_*), no shared state with test_app_v6.",
+    "boot_time_seconds/boot_rss_mb measured via `/usr/bin/time -l bin/rails runner \"exit\"` in RAILS_ENV=production, 5 samples.",
+    "test_suite duration is bundle exec rspec's own reported 'Finished in' wall time (test env), 3 samples.",
+    "microbench_ips computed with the identical scripts used for v6/v8 (iterations / Benchmark.realtime): ar_validation 50k Bicycle#valid? calls under RAILS_ENV=production via bin/rails runner; json_roundtrip 500k JSON.generate+JSON.parse roundtrips; array_sort 1k iterations of building+sorting a 10k-element random Integer array -- plain `ruby` (Ruby 4.0.7's default gemset still ships the benchmark library even though it's no longer auto-required, so the unmodified scripts ran without changes).",
+    "puma_rss_after_load_mb is RSS (ps aux, RSS column) of the single Puma worker process immediately after both ab runs completed."
+  ]
+}

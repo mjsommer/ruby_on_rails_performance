@@ -1,0 +1,39 @@
+{
+  "app_dir": "/Users/sommer/Projects/test_app_v6",
+  "ruby_version": "3.3.12",
+  "rails_version": "6.1.7.10",
+  "asset_pipeline": "webpacker",
+  "js_layer": "turbolinks+ujs",
+  "timestamp": "2026-09-24T21:14:00Z",
+  "os": "macOS 26.7 (Darwin 25.6.0, arm64)",
+  "boot_time_seconds": {
+    "samples": [0.39, 0.38, 0.38, 0.38, 0.38],
+    "mean": 0.382
+  },
+  "boot_rss_mb": {
+    "samples": [96.484, 93.953, 94.031, 96.625, 96.234],
+    "mean": 95.466
+  },
+  "test_suite": {
+    "duration_seconds": [0.07968, 0.08036, 0.07997],
+    "examples": 21,
+    "failures": 0
+  },
+  "http": {
+    "index": {"req_per_sec": 977.42, "mean_latency_ms": 10.231, "p95_ms": 14, "p99_ms": 19},
+    "show":  {"req_per_sec": 1305.22, "mean_latency_ms": 7.662, "p95_ms": 9, "p99_ms": 10}
+  },
+  "puma_rss_after_load_mb": 116.75,
+  "microbench_ips": {
+    "ar_validation": 56615.331656,
+    "json_roundtrip": 1456511.480149,
+    "array_sort": 1031.573366
+  },
+  "notes": [
+    "HTTP load test: ab -n 500 -c 10 against /bicycles and /bicycles/1, RAILS_ENV=production with precompiled assets (Webpacker JS + Sprockets CSS), DATABASE_URL override pointing at a local dedicated test_app_v6_production database (see prep notes -- database.yml's own production role/password were never provisioned locally). 0 failed requests on both endpoints.",
+    "boot_time_seconds/boot_rss_mb measured via `/usr/bin/time -l bin/rails runner \"exit\"` in RAILS_ENV=production, 5 samples.",
+    "test_suite duration is bundle exec rspec's own reported 'Finished in' wall time (test env, not production), 3 samples.",
+    "microbench_ips computed as iterations / Benchmark.realtime for fixed iteration counts (ar_validation: 50k Bicycle#valid? calls under RAILS_ENV=production via bin/rails runner; json_roundtrip: 500k JSON.generate+JSON.parse roundtrips of a representative Bicycle-shaped hash; array_sort: 1k iterations of building+sorting a fresh 10k-element random Integer array) -- plain `ruby`, Ruby 3.3.12, no benchmark-ips gem dependency (not in this app's Gemfile). Scripts are ad hoc, not committed to the repo.",
+    "puma_rss_after_load_mb is RSS (ps aux, RSS column) of the single Puma worker process immediately after both ab runs completed."
+  ]
+}

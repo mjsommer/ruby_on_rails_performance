@@ -1,0 +1,41 @@
+{
+  "app_dir": "/Users/sommer/Projects/test_app_v7_to_v8_org_v6_r4",
+  "ruby_version": "4.0.7",
+  "rails_version": "8.1.3.1",
+  "asset_pipeline": "importmap+sprockets",
+  "js_layer": "turbo+ujs",
+  "timestamp": "2026-09-24T21:33:00Z",
+  "os": "macOS 26.7 (Darwin 25.6.0, arm64)",
+  "boot_time_seconds": {
+    "samples": [0.54, 0.49, 0.49, 0.49, 0.49],
+    "mean": 0.50
+  },
+  "boot_rss_mb": {
+    "samples": [107.844, 107.969, 107.984, 108.078, 108.0],
+    "mean": 107.975
+  },
+  "test_suite": {
+    "duration_seconds": [0.35061, 0.35088, 0.3498],
+    "examples": 34,
+    "failures": 0
+  },
+  "http": {
+    "index": {"req_per_sec": 1153.86, "mean_latency_ms": 8.667, "p95_ms": 13, "p99_ms": 23},
+    "show":  {"req_per_sec": 1591.50, "mean_latency_ms": 6.283, "p95_ms": 8, "p99_ms": 9}
+  },
+  "puma_rss_after_load_mb": 122.406,
+  "microbench_ips": {
+    "ar_validation": 60605.546377,
+    "json_roundtrip": 1706606.958062,
+    "array_sort": 1042.972555
+  },
+  "notes": [
+    "This is a fresh re-measurement of test_app_v7_to_v8_org_v6_r4 with today's exact harness (same ab flags, same microbench scripts/iteration counts, sequential not concurrent execution), superseding the earlier r4.json from the Ruby-3-vs-4 comparison (which used a different, concurrent methodology against r3 and didn't record its ab concurrency setting). Numbers here are NOT directly comparable to that older r4.json.",
+    "Fixed the same database.yml naming bug this app had from creation: config/database.yml still pointed at test_app_v6_{development,test,production} (copy-pasted, never renamed) rather than its own database, meaning this app's dev/test DB was, until this run, literally the same live database as test_app_v6's. Renamed to test_app_v7_to_v8_org_v6_r4_* and re-created/migrated/seeded fresh; re-ran the full RSpec suite afterward (34 examples, 0 failures) to confirm no drift.",
+    "ar_validation microbench required a script change: `bin/rails runner` is Bundler-scoped, and unlike test_app_v7_to_v8_org_v6_r3 (Ruby 3.3.12, where 'benchmark' is still an ordinary default gem) or test_app_v6_r4 (where 'benchmark' was added to the Gemfile as part of porting Rails 6.1 to Ruby 4.0.7), this app's Gemfile never declares 'benchmark' -- so `require \"benchmark\"` raised LoadError here specifically (Ruby 4.0.0 dropped it from default gems). Rewrote the shared ar_validation_bench.rb script to call `Process.clock_gettime(Process::CLOCK_MONOTONIC)` directly instead of `Benchmark.realtime` (which is exactly that call under the hood) -- functionally identical measurement, no gem dependency, now used unmodified for all four cells of the matrix. The three earlier cells' AR-validation numbers (measured via Benchmark.realtime) are not re-run since the timing method is identical in substance.",
+    "HTTP load test: ab -n 500 -c 10 against /bicycles and /bicycles/1, RAILS_ENV=production with precompiled assets (import maps + Sprockets CSS), DATABASE_URL override (its own database.yml production role/password never provisioned locally, same pattern as the other three apps). 0 failed requests on both endpoints. Run sequentially, alone on the machine (no other app's server running).",
+    "boot_time_seconds/boot_rss_mb measured via `/usr/bin/time -l bin/rails runner \"exit\"` in RAILS_ENV=production, 5 samples.",
+    "test_suite duration is bundle exec rspec's own reported 'Finished in' wall time (test env, includes SimpleCov instrumentation like test_app_v7_to_v8_org_v6_r3), 3 samples.",
+    "puma_rss_after_load_mb is RSS (ps aux, RSS column) of the single Puma worker process immediately after both ab runs completed."
+  ]
+}
