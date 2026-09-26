@@ -1,0 +1,41 @@
+<%= form_with model: bicycle, local: true do |form| %>
+  <% if bicycle.errors.any? %>
+    <div class="error_messages">
+      <h2><%= pluralize(bicycle.errors.count, "error") %> prohibited this bicycle from being saved:</h2>
+      <ul>
+        <% bicycle.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= form.label :brand %>
+    <%= form.text_field :brand %>
+  </div>
+
+  <div class="field">
+    <%= form.label :model %>
+    <%= form.text_field :model %>
+  </div>
+
+  <div class="field">
+    <%= form.label :usage_type %>
+    <%= form.select :usage_type, Bicycle::USAGE_TYPES, include_blank: "Select a usage type" %>
+  </div>
+
+  <div class="field">
+    <%= form.label :color %>
+    <%= form.text_field :color %>
+  </div>
+
+  <div class="field">
+    <%= form.label :wheels %>
+    <%= form.number_field :wheels %>
+  </div>
+
+  <div class="actions">
+    <%= form.submit %>
+  </div>
+<% end %>
