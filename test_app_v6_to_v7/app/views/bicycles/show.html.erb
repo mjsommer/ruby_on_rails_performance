@@ -1,0 +1,14 @@
+<p>
+  <%= link_to "← Back to bicycles", bicycles_path %>
+</p>
+
+<h1><%= @bicycle.brand %> <%= @bicycle.model %></h1>
+
+<ul>
+  <li><strong>Usage type:</strong> <%= @bicycle.usage_type %></li>
+  <li><strong>Color:</strong> <%= @bicycle.color %></li>
+  <li><strong>Wheels:</strong> <%= @bicycle.wheels %></li>
+</ul>
+
+<%= link_to "Edit", edit_bicycle_path(@bicycle) %> |
+<%= link_to "Delete", @bicycle, method: :delete, data: { confirm: "Are you sure?" } %>
