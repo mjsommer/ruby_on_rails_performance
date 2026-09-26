@@ -1,0 +1,46 @@
+{
+  "app_dir": "/Users/sommer/Projects/test_app_v7_to_v8_org_v6_r4",
+  "ruby_version": "4.0.7",
+  "rails_version": "8.1.3.1",
+  "timestamp": "2026-09-24T18:09:51Z",
+  "os": "macOS 26.7 (Darwin 25.6.0, arm64, BuildVersion 25G229)",
+  "boot_time_seconds": {
+    "samples": [0.34, 0.31, 0.31, 0.31, 0.32],
+    "mean": 0.318,
+    "stddev": 0.013038404810405309
+  },
+  "boot_rss_mb": {
+    "samples": [92.34375, 92.25, 92.34375, 92.21875, 92.453125],
+    "mean": 92.321875
+  },
+  "test_suite": {
+    "duration_seconds": [1.07, 1.07, 1.05],
+    "examples": 34,
+    "failures": 0
+  },
+  "http": {
+    "index": {
+      "req_per_sec": 374.71,
+      "mean_latency_ms": 26.687,
+      "p95_ms": 37,
+      "p99_ms": 42
+    },
+    "show": {
+      "req_per_sec": 421.15,
+      "mean_latency_ms": 23.745,
+      "p95_ms": 31,
+      "p99_ms": 37
+    }
+  },
+  "puma_rss_after_load_mb": 126.015625,
+  "microbench_ips": {
+    "ar_validation": 61262.2353621381,
+    "json_roundtrip": 2805049.0894335033,
+    "array_sort": 648.0982205766745
+  },
+  "notes": [
+    "ab reported 'Failed requests' due to Length mismatches (499/500 on /bicycles, 275/500 on /bicycles/1); this reflects per-request variation in dynamic HTML byte length (e.g. CSRF tokens), not real HTTP errors -- both endpoints returned 200 consistently via curl checks and ab's own timing/throughput figures are unaffected.",
+    "Ruby 4.0 removed 'benchmark' from the default gem set (it's now an optional gem requiring a Gemfile entry). Since gem/app changes were disallowed, require 'benchmark' raised LoadError under this app's Bundler context. Substituted Process.clock_gettime(CLOCK_MONOTONIC) (Ruby core, not a gem) for wall-clock timing in the microbenchmarks -- functionally equivalent to Benchmark.realtime, which itself wraps clock_gettime.",
+    "Port 3000 was occupied by the sibling A/B comparison app (r3, Ruby 3.3.12) during this run, confirming both apps were being benchmarked concurrently as expected; the HTTP load test used port 3100 instead with no conflict."
+  ]
+}
