@@ -1,0 +1,31 @@
+<h1>Bicycles</h1>
+
+<%= link_to "New Bicycle", new_bicycle_path, class: "button" %>
+
+<table>
+  <thead>
+    <tr>
+      <th>Brand</th>
+      <th>Model</th>
+      <th>Usage type</th>
+      <th>Color</th>
+      <th>Wheels</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @bicycles.each do |bicycle| %>
+      <tr>
+        <td><%= bicycle.brand %></td>
+        <td><%= bicycle.model %></td>
+        <td><%= bicycle.usage_type %></td>
+        <td><%= bicycle.color %></td>
+        <td><%= bicycle.wheels %></td>
+        <td><%= link_to "Show", bicycle %></td>
+        <td><%= link_to "Edit", edit_bicycle_path(bicycle) %></td>
+        <td><%= link_to "Delete", bicycle, method: :delete, data: { confirm: "Are you sure?" } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
